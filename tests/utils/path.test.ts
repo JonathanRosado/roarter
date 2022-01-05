@@ -38,7 +38,7 @@ Deno.test("match correctly matches different paths", () => {
     match(
       "/api",
       "/api/v1/hello",
-      true
+      true,
     ),
   );
 
@@ -46,7 +46,7 @@ Deno.test("match correctly matches different paths", () => {
     match(
       "/",
       "/api/v1/hello",
-      true
+      true,
     ),
   );
 
@@ -54,7 +54,7 @@ Deno.test("match correctly matches different paths", () => {
     match(
       "/api/v1/hello",
       "/api/v1/hello",
-      true
+      true,
     ),
   );
 
@@ -62,7 +62,7 @@ Deno.test("match correctly matches different paths", () => {
     match(
       "/api/:v1",
       "/api/v1/hello",
-      true
+      true,
     ),
   );
 });

@@ -1,4 +1,4 @@
-import { Matcher, ROMap } from "./types.ts";
+import { Matcher } from "./types.ts";
 import { extract, match } from "./utils/path.ts";
 
 export const getMatcher: Matcher = (req) => {
@@ -22,33 +22,33 @@ export const patchMatcher: Matcher = (req) => {
 };
 
 export const buildPathMatcher: (path: string) => Matcher = (path) => {
-  const prefixKey = "PathMatcher#PathPrefix"
+  const prefixKey = "PathMatcher#PathPrefix";
   return (req, matcherIsForASubRouter) => {
     const url = new URL(req.url);
 
     // If the matcher is for a subrouter (as opposed to a handlerFunc), then we want to match the prefix
     // of the path name and store it for later use
     if (matcherIsForASubRouter) {
-      let pathCopy = path
+      let pathCopy = path;
       if (req.vars.has(prefixKey)) {
-        pathCopy = req.vars.get(prefixKey) + pathCopy
+        pathCopy = req.vars.get(prefixKey) + pathCopy;
       }
       if (!match(pathCopy, url.pathname, true)) return false;
-      req.vars.set(prefixKey, pathCopy)
+      req.vars.set(prefixKey, pathCopy);
       const m = extract(pathCopy, url.pathname, true);
       for (const [key, val] of m) {
-        req.params.set(key, val)
+        req.params.set(key, val);
       }
-      return true
+      return true;
     } else {
-      let pathCopy = path
+      let pathCopy = path;
       if (req.vars.has(prefixKey)) {
-        pathCopy = req.vars.get(prefixKey) + pathCopy
+        pathCopy = req.vars.get(prefixKey) + pathCopy;
       }
       if (!match(pathCopy, url.pathname)) return false;
       const m = extract(pathCopy, url.pathname);
       for (const [key, val] of m) {
-        req.params.set(key, val)
+        req.params.set(key, val);
       }
       return true;
     }

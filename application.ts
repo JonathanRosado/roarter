@@ -1,11 +1,11 @@
 import { serve, ServeInit } from "https://deno.land/std@0.119.0/http/server.ts";
 import { Handler } from "./handler.ts";
-import {CatchFunc, HandleFunc, Matcher} from "./types.ts";
+import { CatchFunc, HandleFunc, Matcher } from "./types.ts";
 import { Request as RoarterRequest } from "./request.ts";
 
 export class Application {
-  handlers: Handler[] = [];
-  catchFunc: CatchFunc = () => {
+  private handlers: Handler[] = [];
+  private catchFunc: CatchFunc = () => {
     throw new Error("Not Implemented");
   };
 
@@ -63,7 +63,7 @@ export class Application {
     return h;
   }
 
-  catch(fn: CatchFunc) {
+  catch(fn: CatchFunc): void {
     this.catchFunc = fn;
   }
 
@@ -71,14 +71,14 @@ export class Application {
   // response it finds. After returning the first response, it runs
   // the remaining handlers. The purpose of this is to support middleware
   // after a response has been sent.
-  async runHandlers(req: RoarterRequest): Promise<Response> {
-    let runRemaining = true
+  private async runHandlers(req: RoarterRequest): Promise<Response> {
+    let runRemaining = true;
     let i = 0;
     try {
       try {
         for (i; i < this.handlers.length; i++) {
           const handler = this.handlers[i];
-          const response = await handler.run(req);
+          const response = await handler["run"](req);
           if (response) {
             i++;
             return response;
@@ -86,7 +86,7 @@ export class Application {
         }
       } catch (e) {
         // If an error occurs, we wan't to skip all handlers and run the catchFunc
-        runRemaining = false
+        runRemaining = false;
         return await this.catchFunc(req, e);
       }
       // If after running all the handlers there is no response, throw the error
@@ -99,17 +99,17 @@ export class Application {
         // we run the remaining handlers ignoring their response and errors
         for (i; i < this.handlers.length; i++) {
           const handler = this.handlers[i];
-          handler.run(req).catch(e => {
-            this.catchFunc(req, e)
-          })
+          handler["run"](req).catch((e) => {
+            this.catchFunc(req, e);
+          });
         }
       }
     }
   }
 
-  async handler(domReq: Request): Promise<Response> {
+  private async handler(domReq: Request): Promise<Response> {
     const req = new RoarterRequest(domReq);
-    return this.runHandlers(req)
+    return this.runHandlers(req);
   }
 
   async serve(options?: ServeInit) {

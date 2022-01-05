@@ -8,19 +8,18 @@ import {
   postMatcher,
   putMatcher,
 } from "./matchers.ts";
-import { Response } from "./response.ts";
 import { Request } from "./request.ts";
-import {Application} from "./application.ts";
+import { Application } from "./application.ts";
 
 export class Handler {
-  matchers: Matcher[] = [];
-  handler: (HandleFunc | Application) | null = null;
+  private matchers: Matcher[] = [];
+  private handler: (HandleFunc | Application) | null = null;
 
   private isHandlerASubRouter(): boolean {
-    return this.handler instanceof Application
+    return this.handler instanceof Application;
   }
 
-  runMatchers(req: Request): boolean {
+  private runMatchers(req: Request): boolean {
     for (let i = 0; i < this.matchers.length; i++) {
       const matcher: Matcher = this.matchers[i];
       if (!matcher(req, this.isHandlerASubRouter())) return false;
@@ -28,10 +27,10 @@ export class Handler {
     return true;
   }
 
-  async runHandler(req: Request) {
+  private async runHandler(req: Request) {
     if (!this.handler) return;
     if (this.isHandlerASubRouter()) {
-      return (this.handler as Application).runHandlers(req)
+      return (this.handler as Application)["runHandlers"](req);
     } else {
       return (this.handler as HandleFunc)(req);
     }
@@ -75,7 +74,7 @@ export class Handler {
     return this;
   }
 
-  async run(req: Request) {
+  private async run(req: Request) {
     if (this.runMatchers(req)) {
       return this.runHandler(req);
     }

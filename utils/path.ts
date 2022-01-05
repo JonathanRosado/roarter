@@ -5,9 +5,13 @@
  * @param realPath
  * @param prefix
  */
-export function match(matchPath: string, realPath: string, prefix: boolean = false): boolean {
-  const matchPathSplit = matchPath.split("/").filter(s => s !== '');
-  const realPathSplit = realPath.split("/").filter(s => s !== '');
+export function match(
+  matchPath: string,
+  realPath: string,
+  prefix: boolean = false,
+): boolean {
+  const matchPathSplit = matchPath.split("/").filter((s) => s !== "");
+  const realPathSplit = realPath.split("/").filter((s) => s !== "");
 
   if (!prefix && matchPathSplit.length !== realPathSplit.length) {
     return false;
@@ -35,10 +39,10 @@ export function match(matchPath: string, realPath: string, prefix: boolean = fal
 export function extract(
   matchPath: string,
   realPath: string,
-  prefix: boolean = false
+  prefix: boolean = false,
 ): Map<string, string> {
-  const matchPathSplit = matchPath.split("/").filter(s => s !== '');
-  const realPathSplit = realPath.split("/").filter(s => s !== '');
+  const matchPathSplit = matchPath.split("/").filter((s) => s !== "");
+  const realPathSplit = realPath.split("/").filter((s) => s !== "");
 
   if (!prefix && matchPathSplit.length !== realPathSplit.length) {
     throw new Error(

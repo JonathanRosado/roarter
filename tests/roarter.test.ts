@@ -411,15 +411,15 @@ Deno.test("Roarter successfully catches the error and hands it off to .catch", a
 
 Deno.test("Roarter catches the error from postfix middleware", async () => {
   const t = new Application();
-  let caught = false
-  t.get.handle(async req => {
-    return new Response("done")
-  })
+  let caught = false;
+  t.get.handle(async (req) => {
+    return new Response("done");
+  });
   t.handle(async (req) => {
     throw new Error("error");
   });
   t.catch(async (req, err) => {
-    caught = true
+    caught = true;
     return new Response(err.message);
   });
   // @ts-ignore
@@ -427,45 +427,47 @@ Deno.test("Roarter catches the error from postfix middleware", async () => {
     new Request("https://example.com/hello", { method: "GET" }),
   );
   await new Promise((resolve) => {
-    setTimeout(() => resolve(null), 200)
-  })
+    setTimeout(() => resolve(null), 200);
+  });
   assert(caught);
 });
 
 Deno.test("subrouters work", async () => {
   const app1 = new Application();
 
-  app1.path("/hello").handle(async req => {
-    return new Response("hello")
-  })
+  app1.path("/hello").handle(async (req) => {
+    return new Response("hello");
+  });
 
-  const app2 = new Application()
+  const app2 = new Application();
 
-  app2.path("/api").handle(app1)
+  app2.path("/api").handle(app1);
 
+  // @ts-ignore
   const response = await app2.runHandlers(
     new Request("https://example.com/api/hello", { method: "GET" }),
-  )
+  );
 
-  assertEquals(await response.text(), "hello")
+  assertEquals(await response.text(), "hello");
 });
 
 Deno.test("subrouters work with params", async () => {
   const app1 = new Application();
 
-  app1.path("/hello/:p2").handle(async req => {
-    assertEquals(req.params.get("p1"), "v1")
-    assertEquals(req.params.get("p2"), "v2")
-    return new Response("hello")
-  })
+  app1.path("/hello/:p2").handle(async (req) => {
+    assertEquals(req.params.get("p1"), "v1");
+    assertEquals(req.params.get("p2"), "v2");
+    return new Response("hello");
+  });
 
-  const app2 = new Application()
+  const app2 = new Application();
 
-  app2.path("/api/:p1").handle(app1)
+  app2.path("/api/:p1").handle(app1);
 
+  // @ts-ignore
   const response = await app2.runHandlers(
     new Request("https://example.com/api/v1/hello/v2", { method: "GET" }),
-  )
+  );
 
-  assertEquals(await response.text(), "hello")
+  assertEquals(await response.text(), "hello");
 });

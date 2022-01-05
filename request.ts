@@ -1,5 +1,3 @@
-import { ROMap } from "./types.ts";
-
 class RoarterRequest extends Request {
   public params: Map<string, string> = new Map<string, string>();
   public vars: Map<string, string> = new Map<string, string>();
