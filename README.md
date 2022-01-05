@@ -9,8 +9,8 @@ HTTP server API, with as few abstractions as we can get away with.
 
 # Handlers
 
-The `Application` class is responsible for coordinating an HTTP request's
-interaction with handlers. You may register a new `Handler` via
+The Application class is responsible for coordinating an HTTP request's
+interaction with handlers. You may register a new Handler via
 `Application.handle()` as shown below.
 
 ```typescript
@@ -31,24 +31,27 @@ deno run --allow-net helloWorld.ts
 ```
 
 all requests made to `localhost:8080` will return `Hello World`. This is because
-we have not specified any `Matchers` for our `Handler`, so it will match all/any
-incoming requests.
+we have not specified any Matchers (see below) for our Handler, so it will match all/any
+incoming requests. A Handler without a Matcher is treated as a `Middleware`.
 
 > NOTE: Handlers must be async (return a promise).
 >
 > This is to allow Roarter to orchestrate the HTTP request among middlewares and
 > handlers.
 
-# Matchers
+# Routes
 
-By adding `Matchers` we can make it so the `Handler` is only executed if the
-given conditions are met. For example, if we want our above example to only
+By adding Matchers to Handlers we create `Routes`. Matchers make it so a Handler is only executed if the
+given conditions are met.
+
+For instance, if we want our above example to only
 respond `Hello World` if the request has an HTTP verb of `GET`, we would do the
 following:
 
 ```typescript
 let app = new Application();
 
+// 
 app
   .match((req) => req.method === "GET")
   .handle(async (req) => {
@@ -58,10 +61,10 @@ app
 await app.serve({ port: 8080 });
 ```
 
-`Matchers` are passed the `Request` object and are expected to return boolean.
-If all matchers return `true`, then `Application` will run the `Handler`.
+Matchers are passed the `Request` object and are expected to return boolean.
+If all matchers return `true`, then Roarter will run the `Handler`.
 
-In practice, Roarter includes most of the matchers you would ever need, so the
+In practice, Roarter includes a lot of the Matchers you would need, so the
 above example may be written with the `.get` matcher that's already included in
 the framework.
 
@@ -79,6 +82,8 @@ app
 > This is useful when creating matchers that must "capture" values and pass them
 > down. An example of this is the `.path("/user/:userId")` matcher which has to
 > capture the value passed into `:userId`.
+> 
+> Look at the implementation of the included matchers if you have to build your own.
 
 # Params
 
@@ -95,10 +100,63 @@ app
   });
 ```
 
+# Middleware
+
+A Handler with no Matchers is treated as a Middleware. Roarter will run all
+matching Handlers in order of insertion. Unlike Routes, if a Middleware returns a Response it will
+be sent to the client immediately and execution will end. 
+
+As an example, let's write two Middlewares. One for parsing `req.body` as a JSON
+and another for logging the request.
+
+```typescript
+let app = new Application();
+
+const jsonParser = async (req: Request) => {
+  if (req.body) {
+    req.vars.set("body", await req.json());
+  }
+};
+
+const logger = async (req: Request) => {
+  console.log(`Request sent to ${req.pathname}`);
+};
+
+// This Middleware is the first to get executed. It parses req.body and stores it in req.vars for later use.
+// Since we want to continue execution, we do not return a Response.
+app
+  .handle(jsonParser);
+
+// This Route runs second, and it simply returns the variable that was set by our middleware.
+// When Routes return a Response, it will only end execution for other Routes, not for the remaining Middleware.
+app
+  .post
+  .path("/json")
+  .handle(async (req) => {
+    return Response.json(req.vars.get("body"));
+  });
+
+// This middleware executes last. It simply logs the request.
+// A more common use case would be to perform any cleanup steps made at an earlier point.
+app
+  .handle(logger);
+
+await app.serve({ port: 8080 });
+```
+
+# Routes vs. Middleware
+
+Roarter treats Routes and Middleware a bit differently. 
+
+When a Middleware returns a Response, it stops all further execution. On the other hand, when a Route returns a Response, it only stops all other Routes from executing, **the remaining Middleware will still run**. 
+
+This allows middleware to perform as you would expect from other middleware frameworks, without requiring the use of `next()`. It allows us to keep the API a bit
+simpler and hopefully a bit more intuitive as well.
+
 # Sub Applications
 
 As your application gets larger you will want to logically organize your
-handlers. Roarter supports sub-routing to meet this need. Simply pass an
+Routes. Roarter supports sub-routing to meet this need. Simply pass an
 instance of `Application` to the `.handle()` method and it will treat it as a
 sub-router.
 
@@ -133,7 +191,7 @@ await tenant.serve({ port: 8080 });
 
 # Errors
 
-Roarter `Applications` can handle errors within the handler itself:
+Roarter `Applications` can handle errors within the Route itself:
 
 ```typescript
 app
@@ -207,38 +265,3 @@ app.catch(async (req, err) => {
 await app.serve({ port: 8080 });
 ```
 
-# Middleware
-
-A Handler with no Matchers is essentially a Middleware. Roarter will run all
-matching Handlers in order of insertion, so a Middleware that is added before a
-Handler will run first, the Handler will run after that, and, finally, the
-remaining Middleware if any.
-
-```typescript
-let app = new Application();
-
-const jsonParser = async (req: Request) => {
-  if (req.body) {
-    req.vars.set("body", await req.json());
-  }
-};
-
-const logger = async (req: Request) => {
-  console.log(`Request sent to ${req.pathname}`);
-};
-
-app
-  .handle(jsonParser);
-
-app
-  .post
-  .path("/json")
-  .handle(async (req) => {
-    return Response.json(req.vars.get("body"));
-  });
-
-app
-  .handle(logger);
-
-await app.serve({ port: 8080 });
-```
