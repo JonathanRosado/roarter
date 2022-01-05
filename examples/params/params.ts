@@ -1,6 +1,6 @@
 import { Application, Response } from "../../mod.ts";
 
-let app = new Application();
+const app = new Application();
 
 /**
  * GET index

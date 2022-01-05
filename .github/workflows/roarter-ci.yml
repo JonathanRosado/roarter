@@ -21,10 +21,6 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: deno fmt --check
 
-      - name: check linting
-        if: matrix.os == 'ubuntu-latest'
-        run: deno lint
-
       - name: generate bundle
         run: deno bundle mod.ts roarter.bundle.js
 
