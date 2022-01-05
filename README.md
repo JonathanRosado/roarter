@@ -160,7 +160,7 @@ app.catch(async (req, err) => {
 Roarter's `Request` and `Response` objects extend the native
 [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) and
 [Response](https://developer.mozilla.org/en-US/docs/Web/API/Response) objects.
-Our goal is for our users to familiarize themselves with de native api as much
+Our goal is for our users to familiarize themselves with the native api as much
 as possible. That said, we are not against adding practical utility methods when
 needed. Below is a practical example of receiving and responding JSON.
 
