@@ -1,0 +1,51 @@
+name: ci
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    name: tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+      fail-fast: true
+    steps:
+      - uses: actions/checkout@v2
+      - name: download deno
+        uses: denoland/setup-deno@main
+        with:
+          deno-version: 1.17.0
+
+      - name: check format
+        if: matrix.os == 'ubuntu-latest'
+        run: deno fmt --check
+
+      - name: check linting
+        if: matrix.os == 'ubuntu-latest'
+        run: deno lint
+
+      - name: generate bundle
+        run: deno bundle mod.ts roarter.bundle.js
+
+      - name: run tests
+        run: deno test --allow-read --allow-write --allow-net --jobs 4
+
+      - name: run tests no check
+        run: deno test --allow-read --allow-write --allow-net --no-check --jobs 4
+
+      - name: run tests unstable
+        run: deno test --coverage=./cov --allow-read --allow-write --allow-net --unstable --jobs 4
+
+      - name: run tests using dom libs
+        run: deno test --unstable --allow-read --allow-write --allow-net --config dom.tsconfig.json --jobs 4
+
+      - name: generate lcov
+        if: matrix.os == 'ubuntu-latest'
+        run: deno coverage --unstable --lcov ./cov > cov.lcov
+
+      - name: upload coverage
+        if: matrix.os == 'ubuntu-latest'
+        uses: codecov/codecov-action@v1
+        with:
+          files: cov.lcov
