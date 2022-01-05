@@ -51,7 +51,6 @@ request has an HTTP verb of `GET`, we would do the following:
 ```typescript
 let app = new Application();
 
-//
 app
   .match((req) => req.method === "GET")
   .handle(async (req) => {
