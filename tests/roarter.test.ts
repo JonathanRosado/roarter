@@ -436,7 +436,7 @@ Deno.test("subrouters work", async () => {
   const app1 = new Application();
 
   app1.path("/hello").handle(async (req) => {
-    return Response.json({"message": "Hello"});
+    return Response.json({ "message": "Hello" });
   });
 
   const app2 = new Application();
@@ -448,7 +448,7 @@ Deno.test("subrouters work", async () => {
     new Request("https://example.com/api/hello", { method: "GET" }),
   );
 
-  assertEquals(await response.text(), "{\"message\":\"Hello\"}");
+  assertEquals(await response.text(), '{"message":"Hello"}');
 });
 
 Deno.test("subrouters work with params", async () => {
