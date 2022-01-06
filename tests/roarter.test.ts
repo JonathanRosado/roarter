@@ -345,14 +345,14 @@ Deno.test("Roarter runs all handlers sequentially UNTIL it receives the first Re
       setTimeout(() => resolve(null), 100);
     });
     res += "second";
-    return new Response("second");
+    return Response.text("second");
   });
   t.path("/hello").handle(async (req) => {
     await new Promise((resolve, reject) => {
       setTimeout(() => resolve(null), 100);
     });
     res += "third";
-    return new Response("third");
+    return Response.text("third");
   });
   t.path("/hello2").handle(async (req) => {
     await new Promise((resolve, reject) => {
@@ -436,7 +436,7 @@ Deno.test("subrouters work", async () => {
   const app1 = new Application();
 
   app1.path("/hello").handle(async (req) => {
-    return new Response("hello");
+    return Response.json({"message": "Hello"});
   });
 
   const app2 = new Application();
@@ -448,7 +448,7 @@ Deno.test("subrouters work", async () => {
     new Request("https://example.com/api/hello", { method: "GET" }),
   );
 
-  assertEquals(await response.text(), "hello");
+  assertEquals(await response.text(), "{\"message\":\"Hello\"}");
 });
 
 Deno.test("subrouters work with params", async () => {
