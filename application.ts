@@ -67,42 +67,64 @@ export class Application {
     this.catchFunc = fn;
   }
 
+  private async runAllUntilResponse(req: RoarterRequest, runFromIndex: number) {
+    for (runFromIndex; runFromIndex < this.handlers.length; runFromIndex++) {
+      const handler = this.handlers[runFromIndex];
+      const response = await handler["run"](req);
+      if (response) {
+        return {
+          response,
+          handler,
+          index: runFromIndex,
+        };
+      }
+    }
+  }
+
+  private async runMiddlewaresIgnoreResponse(
+    req: RoarterRequest,
+    runFromIndex: number,
+  ) {
+    for (runFromIndex; runFromIndex < this.handlers.length; runFromIndex++) {
+      const handler = this.handlers[runFromIndex];
+      if (handler["isMiddleware"]()) {
+        await handler["run"](req);
+      }
+    }
+  }
+
   // Handler runs all the registered handlers and returns the first
   // response it finds. After returning the first response, it runs
   // the remaining handlers. The purpose of this is to support middleware
   // after a response has been sent.
   private async runHandlers(req: RoarterRequest): Promise<Response> {
-    let runRemaining = true;
-    let i = 0;
+    let matchedHandler: Handler | null = null;
+    let matchedIndex: number = 0;
+
     try {
-      try {
-        for (i; i < this.handlers.length; i++) {
-          const handler = this.handlers[i];
-          const response = await handler["run"](req);
-          if (response) {
-            i++;
-            return response;
-          }
-        }
-      } catch (e) {
-        // If an error occurs, we wan't to skip all handlers and run the catchFunc
-        runRemaining = false;
-        return await this.catchFunc(req, e);
+      const result = await this.runAllUntilResponse(req, matchedIndex);
+      if (!result) {
+        // If after running all the handlers there is no response, throw the error
+        throw new Error(
+          `No Response was sent for ${req.method} ${req.url}`,
+        );
       }
-      // If after running all the handlers there is no response, throw the error
-      throw new Error(
-        `No Response was sent for ${req.method} ${req.url}`,
-      );
+
+      const { response, handler, index } = result;
+      matchedHandler = handler;
+      matchedIndex = index;
+      return response;
+    } catch (e) {
+      // If an error occurs, we wan't to skip all handlers and run the catchFunc
+      return this.catchFunc(req, e);
     } finally {
-      if (runRemaining) {
-        // Since at this point we have already returned a response,
-        // we run the remaining handlers ignoring their response and errors
-        for (i; i < this.handlers.length; i++) {
-          const handler = this.handlers[i];
-          handler["run"](req).catch((e) => {
-            this.catchFunc(req, e);
-          });
-        }
+      // If the handler that returned a Response is a Route, run all the remaining middleware
+      if (matchedHandler && matchedHandler["isRoute"]()) {
+        matchedIndex++;
+        // We run the remaining middleware asynchronously in order for the return <Response> to go through
+        this.runMiddlewaresIgnoreResponse(req, matchedIndex).catch((e) =>
+          this.catchFunc(req, e)
+        );
       }
     }
   }

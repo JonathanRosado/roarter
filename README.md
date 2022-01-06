@@ -18,7 +18,7 @@ interaction with handlers. You may register a new Handler via
 let app = new Application();
 
 app
-  .handle(async (req) => {
+  .handle(req => {
     return Response.text("Hello World");
   });
 
@@ -33,13 +33,10 @@ deno run --allow-net helloWorld.ts
 
 all requests made to `localhost:8080` will return `Hello World`. This is because
 we have not specified any Matchers (see below) for our Handler, so it will match
-all/any incoming requests. A Handler without a Matcher is treated as a
+all incoming requests. A Handler without a Matcher is treated as a
 `Middleware`.
 
-> NOTE: Handlers must be async (return a promise).
->
-> This is to allow Roarter to orchestrate the HTTP request among middlewares and
-> handlers.
+> NOTE: Handlers may return a Promise (async) as well
 
 # Routes
 
@@ -53,8 +50,8 @@ request has an HTTP verb of `GET`, we would do the following:
 let app = new Application();
 
 app
-  .match((req) => req.method === "GET")
-  .handle(async (req) => {
+  .match(req => req.method === "GET")
+  .handle(req => {
     return Response.text("Hello World");
   });
 
@@ -71,7 +68,7 @@ framework.
 ```typescript
 app
   .get
-  .handle(async (req) => {
+  .handle(req => {
     return Response.text("Hello World");
   });
 ```
@@ -83,8 +80,8 @@ app
 > down. An example of this is the `.path("/user/:userId")` matcher which has to
 > capture the value passed into `:userId`.
 >
-> Look at the implementation of the included matchers if you have to build your
-> own.
+> Look at the implementation of the included matchers if you have a need to
+> build your own.
 
 # Params
 
@@ -104,10 +101,12 @@ app
 # Middleware
 
 A Handler with no Matchers is treated as a Middleware. Roarter will run all
-matching Handlers in order of insertion. Unlike Routes, if a Middleware returns
-a Response it will be sent to the client immediately and execution will end.
+matching Handlers in order of insertion.
 
-As an example, let's write two Middlewares. One for parsing `req.body` as a JSON
+Unlike Routes, if a Middleware returns a Response it will be sent to the client
+immediately and execution will end.
+
+As an example, let's write two Middleware functions. One for parsing `req.body` as a JSON
 and another for logging the request.
 
 ```typescript
@@ -151,15 +150,15 @@ Roarter treats Routes and Middleware a bit differently.
 
 When a Middleware returns a Response, it stops all further execution. On the
 other hand, when a Route returns a Response, it only stops all other Routes from
-executing, **the remaining Middleware will still run**.
+executing, **the remaining middleware will still run**.
 
-This allows middleware to perform as you would expect from other middleware
+This allows middleware to function as you would expect from other middleware
 frameworks, without requiring the use of `next()`. It allows us to keep the API
 a bit simpler and hopefully a bit more intuitive as well.
 
 # Sub Applications
 
-As your application gets larger you will want to logically organize your Routes.
+As your application gets larger you will want to logically organize your Routes and Middleware.
 Roarter supports sub-routing to meet this need. Simply pass an instance of
 `Application` to the `.handle()` method and it will treat it as a sub-router.
 

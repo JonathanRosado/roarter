@@ -36,6 +36,14 @@ export class Handler {
     }
   }
 
+  private isMiddleware() {
+    return this.handler !== null && this.matchers.length === 0;
+  }
+
+  private isRoute() {
+    return this.handler !== null && this.matchers.length > 0;
+  }
+
   match(custom: Matcher): Handler {
     this.matchers.push(custom);
     return this;

@@ -13,13 +13,13 @@ Deno.test("matchers can go before or after handler", async () => {
   t.get.path("/hello1").handle(async (req) => {
     count++;
   });
-  t.handle(async (req) => {
+  t.handle((req) => {
     count++;
   }).get.path("/hello2");
-  t.get.handle(async (req) => {
+  t.get.handle((req) => {
     count++;
   }).path("/hello3");
-  t.handle(async (req) => new Response("last"));
+  t.handle((req) => new Response("last"));
   // @ts-ignore
   await t.runHandlers(
     new Request(
@@ -55,7 +55,7 @@ Deno.test("verb matchers", async () => {
   {
     const t = new Application();
     let count = 0;
-    t.get.handle(async (req) => {
+    t.get.handle((req) => {
       count++;
       return new Response();
     });
@@ -74,7 +74,7 @@ Deno.test("verb matchers", async () => {
   {
     const t = new Application();
     let count = 0;
-    t.post.handle(async (req) => {
+    t.post.handle((req) => {
       count++;
       return new Response();
     });
@@ -93,7 +93,7 @@ Deno.test("verb matchers", async () => {
   {
     const t = new Application();
     let count = 0;
-    t.put.handle(async (req) => {
+    t.put.handle((req) => {
       count++;
       return new Response();
     });
@@ -112,7 +112,7 @@ Deno.test("verb matchers", async () => {
   {
     const t = new Application();
     let count = 0;
-    t.delete.handle(async (req) => {
+    t.delete.handle((req) => {
       count++;
       return new Response();
     });
@@ -131,7 +131,7 @@ Deno.test("verb matchers", async () => {
   {
     const t = new Application();
     let count = 0;
-    t.patch.handle(async (req) => {
+    t.patch.handle((req) => {
       count++;
       return new Response();
     });
@@ -150,10 +150,10 @@ Deno.test("verb matchers", async () => {
   {
     const t = new Application();
     let count = 0;
-    t.delete.handle(async (req) => {
+    t.delete.handle((req) => {
       count++;
     });
-    t.handle(async (req) => new Response(""));
+    t.handle((req) => new Response(""));
     // @ts-ignore
     await t.runHandlers(
       new Request(
@@ -171,7 +171,7 @@ Deno.test("path matcher", async () => {
   {
     const t = new Application();
     let id;
-    t.handle(async (req) => {
+    t.handle((req) => {
       id = req.params.get("id");
       return new Response();
     }).path("/users/:id");
@@ -185,7 +185,7 @@ Deno.test("path matcher", async () => {
     let id1;
     let id2;
     let id3;
-    t.handle(async (req) => {
+    t.handle((req) => {
       id1 = req.params.get("id1");
       id2 = req.params.get("id2");
       id3 = req.params.get("id3");
@@ -201,7 +201,7 @@ Deno.test("path matcher", async () => {
   {
     const t = new Application();
     let id;
-    t.handle(async (req) => {
+    t.handle((req) => {
       id = req.params.get("id");
       return new Response();
     }).path("/users/:id");
@@ -217,7 +217,7 @@ Deno.test("path matcher", async () => {
   {
     const t = new Application();
     let id;
-    t.handle(async (req) => {
+    t.handle((req) => {
       id = req.params.get("some-weird.key[with](funny);chars;");
       return new Response();
     }).path("/users/:some-weird.key[with](funny);chars;");
@@ -231,7 +231,7 @@ Deno.test("edge cases with paths", async () => {
   {
     const t = new Application();
     let hit;
-    t.handle(async (req) => {
+    t.handle((req) => {
       hit = true;
       return new Response();
     }).path("/");
@@ -243,7 +243,7 @@ Deno.test("edge cases with paths", async () => {
   {
     const t = new Application();
     let hit;
-    t.handle(async (req) => {
+    t.handle((req) => {
       hit = true;
       return new Response();
     }).path("/");
@@ -255,7 +255,7 @@ Deno.test("edge cases with paths", async () => {
   {
     const t = new Application();
     let hit;
-    t.handle(async (req) => {
+    t.handle((req) => {
       hit = true;
       return new Response();
     }).path("/");
@@ -267,7 +267,7 @@ Deno.test("edge cases with paths", async () => {
   {
     const t = new Application();
     let hit;
-    t.handle(async (req) => {
+    t.handle((req) => {
       hit = true;
       return new Response();
     }).path("/");
@@ -279,11 +279,11 @@ Deno.test("edge cases with paths", async () => {
   {
     const t = new Application();
     let hit;
-    t.handle(async (req) => {
+    t.handle((req) => {
       hit = true;
       return new Response();
     }).path("/");
-    t.handle(async (req) => new Response());
+    t.handle((req) => new Response());
     // @ts-ignore
     await t.runHandlers(new Request("http://example.com/hello?key=val"));
     assert(!hit);
@@ -294,7 +294,7 @@ Deno.test("query params matching", async () => {
   {
     const t = new Application();
     let hit;
-    t.handle(async (req) => {
+    t.handle((req) => {
       hit = req.queries.get("key");
       return new Response();
     }).path("/").queries(["key"]);
@@ -306,7 +306,7 @@ Deno.test("query params matching", async () => {
   {
     const t = new Application();
     let hit;
-    t.handle(async (req) => {
+    t.handle((req) => {
       hit = req.queries.get("key1") as string + req.queries.get("key2");
       return new Response();
     }).path("/hello/there").queries(["key1", "key2"]);
@@ -320,10 +320,10 @@ Deno.test("query params matching", async () => {
   {
     const t = new Application();
     let hit;
-    t.handle(async (req) => {
+    t.handle((req) => {
       hit = req.queries.get("key1") as string + req.queries.get("key2");
     }).path("/hello/there").queries(["key"]);
-    t.handle(async (req) => new Response());
+    t.handle((req) => new Response());
     // @ts-ignore
     await t.runHandlers(new Request("http://example.com/hello/there?nope=val"));
     assertEquals(hit, undefined);
@@ -390,15 +390,15 @@ Deno.test("Roarter runs all handlers sequentially UNTIL it receives the first Re
   await new Promise((resolve, reject) => {
     setTimeout(() => resolve(null), 1000);
   });
-  assertEquals(res, "firstsecondthirdfourthfifth");
+  assertEquals(res, "firstsecondfourthfifth");
 });
 
 Deno.test("Roarter successfully catches the error and hands it off to .catch", async () => {
   const t = new Application();
-  t.handle(async (req) => {
+  t.handle((req) => {
     throw new Error("error");
   });
-  t.catch(async (req, err) => {
+  t.catch((req, err) => {
     return new Response(err.message);
   });
   // @ts-ignore
@@ -412,13 +412,13 @@ Deno.test("Roarter successfully catches the error and hands it off to .catch", a
 Deno.test("Roarter catches the error from postfix middleware", async () => {
   const t = new Application();
   let caught = false;
-  t.get.handle(async (req) => {
+  t.get.handle((req) => {
     return new Response("done");
   });
-  t.handle(async (req) => {
+  t.handle((req) => {
     throw new Error("error");
   });
-  t.catch(async (req, err) => {
+  t.catch((req, err) => {
     caught = true;
     return new Response(err.message);
   });
@@ -435,7 +435,7 @@ Deno.test("Roarter catches the error from postfix middleware", async () => {
 Deno.test("subrouters work", async () => {
   const app1 = new Application();
 
-  app1.path("/hello").handle(async (req) => {
+  app1.path("/hello").handle((req) => {
     return Response.json({ "message": "Hello" });
   });
 
@@ -454,7 +454,7 @@ Deno.test("subrouters work", async () => {
 Deno.test("subrouters work with params", async () => {
   const app1 = new Application();
 
-  app1.path("/hello/:p2").handle(async (req) => {
+  app1.path("/hello/:p2").handle((req) => {
     assertEquals(req.params.get("p1"), "v1");
     assertEquals(req.params.get("p2"), "v2");
     return new Response("hello");
@@ -470,4 +470,118 @@ Deno.test("subrouters work with params", async () => {
   );
 
   assertEquals(await response.text(), "hello");
+});
+
+Deno.test("middleware should stop all further execution upon returning a response", async () => {
+  const app = new Application();
+  let res = "";
+
+  app.handle((req) => {
+    res += "1";
+  });
+  app.handle((req) => {
+    res += "2";
+    return new Response();
+  });
+  app.get.path("/").handle((req) => {
+    res += "3";
+    return new Response();
+  });
+  app.get.path("/").handle((req) => {
+    res += "4";
+    return new Response();
+  });
+  app.handle((req) => {
+    res += "5";
+    return new Response();
+  });
+  app.handle((req) => {
+    res += "6";
+    return new Response();
+  });
+
+  // @ts-ignore
+  const response = await app.runHandlers(
+    new Request("https://example.com/", { method: "GET" }),
+  );
+
+  assertEquals(res, "12");
+});
+
+Deno.test("routes should stop all further execution of all other routes upon returning a response", async () => {
+  const app = new Application();
+  let res = "";
+
+  app.handle((req) => {
+    res += "1";
+  });
+  app.get.path("/").handle((req) => {
+    res += "2";
+    return new Response();
+  });
+  app.get.path("/").handle((req) => {
+    res += "3";
+    return new Response();
+  });
+  app.get.path("/").handle((req) => {
+    res += "4";
+    return new Response();
+  });
+  app.get.path("/").handle((req) => {
+    res += "5";
+    return new Response();
+  });
+  app.handle((req) => {
+    res += "6";
+    return new Response();
+  });
+
+  // @ts-ignore
+  const response = await app.runHandlers(
+    new Request("https://example.com/", { method: "GET" }),
+  );
+
+  assertEquals(res, "126");
+});
+
+Deno.test("After a Route returns a Response, the remaining middlewares are executed sequentially.", async () => {
+  const t = new Application();
+  let res = "";
+
+  t.path("/hello").handle(async (req) => {
+    await new Promise((resolve, reject) => {
+      setTimeout(() => resolve(null), 1000);
+    });
+    res += "first";
+    return Response.text("first");
+  });
+  t.handle(async (req) => {
+    await new Promise((resolve, reject) => {
+      setTimeout(() => resolve(null), 500);
+    });
+    res += "second";
+  });
+  t.handle(async (req) => {
+    await new Promise((resolve, reject) => {
+      setTimeout(() => resolve(null), 20);
+    });
+    res += "third";
+  });
+
+  // @ts-ignore
+  const response = await t.runHandlers(
+    new Request("https://example.com/hello", { method: "GET" }),
+  );
+  const text = await response.text();
+  // Handler returns the first Response it finds
+  assertEquals(text, "first");
+  // Since 'first' and 'second' were executed synchronously and the rest were not,
+  // we only expect 'first' and 'second' to have been waited on
+  assertEquals(res, "first");
+
+  // The rest will appear after some time
+  await new Promise((resolve, reject) => {
+    setTimeout(() => resolve(null), 1000);
+  });
+  assertEquals(res, "firstsecondthird");
 });
