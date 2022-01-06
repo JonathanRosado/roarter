@@ -1,5 +1,9 @@
 [![oak ci](https://github.com/JonathanRosado/roarter/workflows/ci/badge.svg)](https://github.com/JonathanRosado/roarter)
 
+[![](https://img.shields.io/github/workflow/status/<user>/<repo>/CI?style=flat-square)](https://github.com/JonathanRosado/roarter/actions)
+
+[![](https://img.shields.io/codecov/c/gh/<user>/<repo>?style=flat-square)](https://codecov.io/gh/JonathanRosado/roarter)
+
 # Roarter
 
 A minimalist, intuitive, and unobtrusive middleware framework for Deno.
