@@ -18,7 +18,7 @@ interaction with handlers. You may register a new Handler via
 let app = new Application();
 
 app
-  .handle(req => {
+  .handle((req) => {
     return Response.text("Hello World");
   });
 
@@ -33,8 +33,7 @@ deno run --allow-net helloWorld.ts
 
 all requests made to `localhost:8080` will return `Hello World`. This is because
 we have not specified any Matchers (see below) for our Handler, so it will match
-all incoming requests. A Handler without a Matcher is treated as a
-`Middleware`.
+all incoming requests. A Handler without a Matcher is treated as a `Middleware`.
 
 > NOTE: Handlers may return a Promise (async) as well
 
@@ -50,8 +49,8 @@ request has an HTTP verb of `GET`, we would do the following:
 let app = new Application();
 
 app
-  .match(req => req.method === "GET")
-  .handle(req => {
+  .match((req) => req.method === "GET")
+  .handle((req) => {
     return Response.text("Hello World");
   });
 
@@ -68,7 +67,7 @@ framework.
 ```typescript
 app
   .get
-  .handle(req => {
+  .handle((req) => {
     return Response.text("Hello World");
   });
 ```
@@ -106,8 +105,8 @@ matching Handlers in order of insertion.
 Unlike Routes, if a Middleware returns a Response it will be sent to the client
 immediately and execution will end.
 
-As an example, let's write two Middleware functions. One for parsing `req.body` as a JSON
-and another for logging the request.
+As an example, let's write two Middleware functions. One for parsing `req.body`
+as a JSON and another for logging the request.
 
 ```typescript
 let app = new Application();
@@ -158,9 +157,10 @@ a bit simpler and hopefully a bit more intuitive as well.
 
 # Sub Applications
 
-As your application gets larger you will want to logically organize your Routes and Middleware.
-Roarter supports sub-routing to meet this need. Simply pass an instance of
-`Application` to the `.handle()` method and it will treat it as a sub-router.
+As your application gets larger you will want to logically organize your Routes
+and Middleware. Roarter supports sub-routing to meet this need. Simply pass an
+instance of `Application` to the `.handle()` method and it will treat it as a
+sub-router.
 
 ```typescript
 let user = new Application();
