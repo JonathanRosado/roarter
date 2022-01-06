@@ -1,5 +1,4 @@
 [![oak ci](https://github.com/JonathanRosado/roarter/workflows/ci/badge.svg)](https://github.com/JonathanRosado/roarter)
-
 [![codecov](https://codecov.io/gh/JonathanRosado/roarter/branch/master/graph/badge.svg?token=0ZN4BS4ZH7)](https://codecov.io/gh/JonathanRosado/roarter)
 
 # Roarter
